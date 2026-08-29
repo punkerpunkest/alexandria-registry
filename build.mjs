@@ -196,23 +196,23 @@ function packagePage(kind, p) {
   </div>`
     : '';
 
-  const sub = kind === 'simulations'
-    ? `${esc(kb(p.archive?.bytes ?? 0))} &middot; <a href="/index.json">hash in the index</a>`
-    : `${esc(kb(p.archive?.bytes ?? 0))} &middot; unpacks into <code>worlds/${esc(p.id)}/</code>`;
+  const sub = !p.archive
+    ? 'Not packaged yet.'
+    : kind === 'simulations'
+      ? `${esc(kb(p.archive.bytes))} &middot; <a href="/index.json">hash in the index</a>`
+      : `${esc(kb(p.archive.bytes))} &middot; unpacks into <code>worlds/${esc(p.id)}/</code>`;
   const action = p.archive
-    ? `<a class="btn" href="/${esc(p.archive.path)}" download>Download archive</a>
-      <p class="btn__note">${sub}</p>`
-    : `<p class="btn__note">Not packaged yet.</p>`;
+    ? `<a class="btn" href="/${esc(p.archive.path)}" download>Download archive</a>`
+    : '';
 
   const body = `<main class="page page--package col">
   <a class="back" href="${k.href}">&larr; Registry</a>
 
   <div class="head">
-    <div>
-      <h1 class="title">${esc(p.id)}</h1>
-      <p class="meta">${esc(p.source)} <span>&middot;</span> ${esc(m.version)} <span>&middot;</span> ${reviewDot(p)} ${esc(reviewOf(p))}</p>
-    </div>
+    <h1 class="title">${esc(p.id)}</h1>
     <div class="head__actions">${action}</div>
+    <p class="meta">${esc(p.source)} <span>&middot;</span> ${esc(m.version)} <span>&middot;</span> ${reviewDot(p)} ${esc(reviewOf(p))}</p>
+    ${sub ? `<p class="btn__note">${sub}</p>` : ''}
   </div>
 
   ${note}
