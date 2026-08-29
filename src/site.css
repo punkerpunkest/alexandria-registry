@@ -163,7 +163,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .row:last-child { border-bottom: 0; }
 .row:hover { background: var(--bg-highlight); }
 .row__rank { font-size: var(--size-meta); line-height: var(--line-meta); color: var(--text-muted); }
-.row__name { display: flex; align-items: center; gap: 18px; }
+.row__name { display: flex; align-items: center; gap: 12px; min-width: 0; padding-right: 18px; overflow: hidden; }
 .row__name b { font-weight: 700; }
 .row__name em { font-style: normal; color: var(--text-muted); }
 .row__desc { color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -187,7 +187,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   border: 1px solid var(--border); border-radius: var(--radius-md);
   color: var(--text-dim);
 }
-.bar a { margin-left: auto; color: var(--cyan); }
+.bar a { margin-left: auto; color: var(--cyan); white-space: nowrap; }
 .bar a:hover { text-decoration: underline; }
 
 @media (max-width: 912px) { .bar { flex-wrap: wrap; } .bar a { margin-left: 0; } }

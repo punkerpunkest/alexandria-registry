@@ -78,9 +78,10 @@ function listPage(kind) {
         <span class="row__desc">${esc(p.blurb)}</span>
       </a>`).join('\n');
 
+  const topics = new Set(items.map((p) => (p.facts.find(([a]) => a === 'SUBJECT') || [])[1]).filter(Boolean)).size;
   const barText = kind === 'worlds'
     ? `${counts.worlds} worlds in the catalog. Taste is the only way to pick one.`
-    : `${counts.simulations} simulations in the catalog, and every topic below chemistry and biology is still empty.`;
+    : `${counts.simulations} simulations in the catalog, across ${topics} topics.`;
 
   const body = `<main class="page col">
   <header class="hero">
@@ -253,7 +254,7 @@ await mkdir(join(OUT, 'worlds'), { recursive: true });
 await mkdir(join(OUT, 'simulations'), { recursive: true });
 
 await writeFile(join(OUT, 'index.html'), listPage('worlds'));
-await writeFile(join(OUT, 'simulations.html'), listPage('simulations'));
+await writeFile(join(OUT, 'simulations', 'index.html'), listPage('simulations'));
 
 let pages = 2;
 for (const kind of Object.keys(KIND)) {
