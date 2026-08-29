@@ -1,0 +1,197 @@
+{
+  "_note": "Facts under `facts` and the version/archetype/task fields are mirrored from the real manifests in the alexandria repo by tools/sync-catalog.mjs. `blurb`, `about` and ordering are authored here and the sync preserves them.",
+  "worlds": [
+    {
+      "id": "cartoon",
+      "name": "Cartoon",
+      "version": "0.7.0",
+      "source": "alexandria/worlds",
+      "review": "unreviewed",
+      "blurb": "Two characters at a board, one slide per beat",
+      "about": [
+        "A paged world. Two characters stand at a board and work through the material one slide at a time, with a teacher who stays on screen and a progress bar that fills as the module runs. A concept beat is worked at the board; a misconception beat is the moment the student character gets it wrong in the way most people do, and is corrected.",
+        "It is the most furnished of the three worlds, and the only one that pins a fixed artboard for the runtime to letterbox to. Its cast, expressions and backgrounds ship inside the package, so the model only ever picks a name from a closed list and never emits a path."
+      ],
+      "facts": [
+        [
+          "ARCHETYPE",
+          "paginated"
+        ],
+        [
+          "BEATS STAGED",
+          "concept, misconception"
+        ],
+        [
+          "BEATS PER MODULE",
+          "3 to 10"
+        ],
+        [
+          "PAGINATION",
+          "one beat per screen"
+        ],
+        [
+          "SHIPS CODE",
+          "no"
+        ],
+        [
+          "REVIEW",
+          "unreviewed"
+        ]
+      ]
+    },
+    {
+      "id": "visual-novel",
+      "name": "Visual Novel",
+      "version": "0.1.0",
+      "source": "alexandria/worlds",
+      "review": "unreviewed",
+      "blurb": "One speaker on stage, scene by scene",
+      "about": [
+        "A scene-sequential world. One speaker holds the stage at a time, centred and bottom-anchored, and the module advances scene by scene with no way back. Sprites are split into a base and a face overlay, so an expression change is a swap rather than a second full drawing.",
+        "Every measurement in its stylesheet is in container units, so it is genuinely fluid rather than pinned. It declares a viewport as a constraint the runtime satisfies, never as a size it demands."
+      ],
+      "facts": [
+        [
+          "ARCHETYPE",
+          "scene-sequential"
+        ],
+        [
+          "BEATS STAGED",
+          "concept, misconception"
+        ],
+        [
+          "BEATS PER MODULE",
+          "3 to 6"
+        ],
+        [
+          "PAGINATION",
+          "one beat per screen"
+        ],
+        [
+          "SHIPS CODE",
+          "no"
+        ],
+        [
+          "REVIEW",
+          "unreviewed"
+        ]
+      ]
+    },
+    {
+      "id": "longform",
+      "name": "Longform",
+      "version": "0.1.0",
+      "source": "alexandria/worlds",
+      "review": "unreviewed",
+      "blurb": "One scroll, no controls. Scrolling advances it",
+      "about": [
+        "A continuous world. Every section is co-resident in one scroller and there are no controls anywhere, so scrolling is the whole of the navigation. It ships no cast and no art; the only media is generated, from a diagram spec the model fills in.",
+        "It is the world that proves the viewport block is optional. Cartoon pins an artboard because it has to; Longform declares none and reflows, which is why the runtime cannot assume every world wants letterboxing."
+      ],
+      "facts": [
+        [
+          "ARCHETYPE",
+          "continuous"
+        ],
+        [
+          "BEATS STAGED",
+          "concept, misconception"
+        ],
+        [
+          "BEATS PER MODULE",
+          "4 to 7"
+        ],
+        [
+          "PAGINATION",
+          "one beat per screen"
+        ],
+        [
+          "SHIPS CODE",
+          "no"
+        ],
+        [
+          "REVIEW",
+          "unreviewed"
+        ]
+      ]
+    }
+  ],
+  "simulations": [
+    {
+      "id": "microscope",
+      "name": "Compound Microscope",
+      "version": "0.1.0",
+      "source": "alexandria/engines",
+      "review": "unreviewed",
+      "blurb": "Focus a real slide, and count the mistakes",
+      "about": [
+        "A compound microscope with three objectives, coarse and fine focus, a stage and an aperture. The task names a total magnification, a specimen, and the state the instrument was left in. Reaching sharp focus is the goal, and the engine can tell whether you got there.",
+        "The goal is not the point. What it teaches is the four procedural mistakes it makes visible and counts on the way: racking down onto the slide, reaching for coarse focus at high power, hunting for focus with the illumination shut, and stepping up in power before the specimen is sharp. Its manifest is unusually explicit about what it does not model, because a simulation that quietly omits a mechanism teaches that the mechanism does not exist."
+      ],
+      "facts": [
+        [
+          "SUBJECT",
+          "biology"
+        ],
+        [
+          "LEVEL BAND",
+          "lower secondary, upper secondary"
+        ],
+        [
+          "TASK SPACE",
+          "focus-specimen, power-series"
+        ],
+        [
+          "SCORED",
+          "yes"
+        ],
+        [
+          "SANDBOX",
+          "iframe, no network"
+        ],
+        [
+          "REVIEW",
+          "unreviewed"
+        ]
+      ]
+    },
+    {
+      "id": "molecule-builder",
+      "name": "Molecule Builder",
+      "version": "0.1.0",
+      "source": "alexandria/engines",
+      "review": "unreviewed",
+      "blurb": "Build molecules from atoms, valence enforced",
+      "about": [
+        "Individual atoms of hydrogen, carbon, nitrogen and oxygen, and bonds you make yourself. A build-target task names one molecule to build; a free-build task names a structural constraint instead, so more than one answer is correct. Valence is enforced, so a molecule that could not exist cannot be assembled.",
+        "It models single covalent bonds and nothing else, and says so in every task parameter rather than burying it: no O2, no CO2, no N2. An engine that does not declare what it cannot model will eventually be handed a task it gets wrong, and the student has no way to know."
+      ],
+      "facts": [
+        [
+          "SUBJECT",
+          "chemistry"
+        ],
+        [
+          "LEVEL BAND",
+          "lower secondary, upper secondary"
+        ],
+        [
+          "TASK SPACE",
+          "build-target, free-build"
+        ],
+        [
+          "SCORED",
+          "yes"
+        ],
+        [
+          "SANDBOX",
+          "iframe, no network"
+        ],
+        [
+          "REVIEW",
+          "unreviewed"
+        ]
+      ]
+    }
+  ]
+}
