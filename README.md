@@ -29,16 +29,18 @@ catalog/packages.json   the catalog. Facts mirror the real manifests; blurbs are
 build.mjs               the whole build
 src/site.css            Tokyo Night Storm on a character grid
 public/fonts/           Hack, subset to the characters this site uses (~6KB per weight)
-public/shots/<id>/      screenshots, sorted by filename; captions.json is optional
+public/shots/<id>/      screenshots (webp), sorted by filename; captions.json is optional
 ```
 
 ## Adding a package
 
 1. Add an entry to `catalog/packages.json` with an `id`, a `blurb` of 48 characters or
    fewer, and one or two `about` paragraphs.
-2. Drop screenshots into `public/shots/<id>/` as `01.png`, `02.png`, … and, if you want
+2. Drop screenshots into `public/shots/<id>/` as `01.webp`, `02.webp`, … and, if you want
    captions under the carousel, a `captions.json` holding an array of short strings in the
-   same order.
+   same order. The ones here were captured from the app itself in deterministic fixture
+   mode, so they are real renders of real modules rather than mockups — a package earns its
+   claims by rendering.
 3. Run `npm run sync` so the version, archetype, task space and review status come from the
    package's own manifest rather than from whatever was typed here.
 
