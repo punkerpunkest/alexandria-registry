@@ -7,6 +7,6 @@
   "scripts": {
     "build": "node build.mjs",
     "sync": "node tools/sync-catalog.mjs",
-    "serve": "node --run build && node -e \"import('node:http').then(({default:h})=>import('node:fs').then(({default:f})=>h.createServer((q,s)=>{const p='dist'+(q.url==='/'?'/index.html':q.url.split('?')[0]);const t=p.endsWith('.css')?'text/css':p.endsWith('.js')?'text/javascript':p.endsWith('.png')?'image/png':p.endsWith('.woff2')?'font/woff2':'text/html';try{s.writeHead(200,{'content-type':t});s.end(f.readFileSync(f.existsSync(p)?p:p+'.html'))}catch(e){s.writeHead(404);s.end('not found')}}).listen(4321,()=>console.log('http://localhost:4321'))))\""
+    "serve": "node build.mjs && node tools/preview.mjs"
   }
 }
