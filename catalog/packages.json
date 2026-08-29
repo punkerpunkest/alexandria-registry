@@ -1,17 +1,33 @@
 {
-  "_note": "Facts under `facts` and the version/archetype/task fields are mirrored from the real manifests in the alexandria repo by tools/sync-catalog.mjs. `blurb`, `about` and ordering are authored here and the sync preserves them.",
+  "_note": "Facts under `facts` and everything under `manifest` are mirrored from the real manifests in the alexandria repo by tools/sync-catalog.mjs. `blurb`, `about`, `pitch`, `topic` and ordering are authored here and the sync preserves them. `archive` is written by tools/pack.mjs.",
   "worlds": [
     {
       "id": "cartoon",
-      "name": "Cartoon",
-      "version": "0.7.0",
       "source": "alexandria/worlds",
-      "review": "unreviewed",
       "blurb": "Two characters at a board, one slide per beat",
       "about": [
         "A paged world. Two characters stand at a board and work through the material one slide at a time, with a teacher who stays on screen and a progress bar that fills as the module runs. A concept beat is worked at the board; a misconception beat is the moment the student character gets it wrong in the way most people do, and is corrected.",
         "It is the most furnished of the three worlds, and the only one that pins a fixed artboard for the runtime to letterbox to. Its cast, expressions and backgrounds ship inside the package, so the model only ever picks a name from a closed list and never emits a path."
       ],
+      "manifest": {
+        "name": "Cartoon",
+        "version": "0.7.0",
+        "archetype": "paginated",
+        "viewport": {
+          "minWidth": 1368,
+          "minHeight": 772,
+          "aspect": 1.772
+        },
+        "beats": {
+          "min": 3,
+          "max": 10,
+          "kinds": [
+            "concept",
+            "misconception"
+          ]
+        },
+        "pagination": "one-beat-per-screen"
+      },
       "facts": [
         [
           "ARCHETYPE",
@@ -30,26 +46,55 @@
           "one beat per screen"
         ],
         [
+          "VIEWPORT",
+          "1368×772 minimum"
+        ],
+        [
           "SHIPS CODE",
           "no"
         ],
         [
           "REVIEW",
-          "unreviewed"
+          "not declared in world.json"
         ]
-      ]
+      ],
+      "archive": {
+        "path": "packages/worlds/cartoon/0.7.0.tar.gz",
+        "hash": "sha256-cU3a6hiKAsTIJZbwkIiObtucE/zde3GMOsbAwUy90C0=",
+        "bytes": 398083,
+        "srcHash": "aa7af91a725b9fc7c2640d324ba14d5ac7c058e9c828a14f6ed1328c65bab3d4"
+      }
     },
     {
       "id": "visual-novel",
-      "name": "Visual Novel",
-      "version": "0.1.0",
       "source": "alexandria/worlds",
-      "review": "unreviewed",
       "blurb": "One speaker on stage, scene by scene",
       "about": [
         "A scene-sequential world. One speaker holds the stage at a time, centred and bottom-anchored, and the module advances scene by scene with no way back. Sprites are split into a base and a face overlay, so an expression change is a swap rather than a second full drawing.",
         "Every measurement in its stylesheet is in container units, so it is genuinely fluid rather than pinned. It declares a viewport as a constraint the runtime satisfies, never as a size it demands."
       ],
+      "manifest": {
+        "name": "Visual Novel",
+        "version": "0.1.0",
+        "archetype": "scene-sequential",
+        "viewport": {
+          "minWidth": 1368,
+          "minHeight": 652,
+          "aspect": [
+            1.78,
+            2.1
+          ]
+        },
+        "beats": {
+          "min": 3,
+          "max": 6,
+          "kinds": [
+            "concept",
+            "misconception"
+          ]
+        },
+        "pagination": "one-beat-per-screen"
+      },
       "facts": [
         [
           "ARCHETYPE",
@@ -68,26 +113,47 @@
           "one beat per screen"
         ],
         [
+          "VIEWPORT",
+          "1368×652 minimum"
+        ],
+        [
           "SHIPS CODE",
           "no"
         ],
         [
           "REVIEW",
-          "unreviewed"
+          "not declared in world.json"
         ]
-      ]
+      ],
+      "archive": {
+        "path": "packages/worlds/visual-novel/0.1.0.tar.gz",
+        "hash": "sha256-rPuCXVbRxJrBMmZHwTgiCB1ZuNevo5rzav2yBrn/nHc=",
+        "bytes": 3517280,
+        "srcHash": "7cf1c3caf9415b2a9ba938d0abd4af5106365321d3935d2aa618c7b6ac7529c4"
+      }
     },
     {
       "id": "longform",
-      "name": "Longform",
-      "version": "0.1.0",
       "source": "alexandria/worlds",
-      "review": "unreviewed",
       "blurb": "One scroll, no controls. Scrolling advances it",
       "about": [
         "A continuous world. Every section is co-resident in one scroller and there are no controls anywhere, so scrolling is the whole of the navigation. It ships no cast and no art; the only media is generated, from a diagram spec the model fills in.",
         "It is the world that proves the viewport block is optional. Cartoon pins an artboard because it has to; Longform declares none and reflows, which is why the runtime cannot assume every world wants letterboxing."
       ],
+      "manifest": {
+        "name": "Longform",
+        "version": "0.1.0",
+        "archetype": "continuous",
+        "beats": {
+          "min": 4,
+          "max": 7,
+          "kinds": [
+            "concept",
+            "misconception"
+          ]
+        },
+        "pagination": "one-beat-per-screen"
+      },
       "facts": [
         [
           "ARCHETYPE",
@@ -106,28 +172,55 @@
           "one beat per screen"
         ],
         [
+          "VIEWPORT",
+          "none declared"
+        ],
+        [
           "SHIPS CODE",
           "no"
         ],
         [
           "REVIEW",
-          "unreviewed"
+          "not declared in world.json"
         ]
-      ]
+      ],
+      "archive": {
+        "path": "packages/worlds/longform/0.1.0.tar.gz",
+        "hash": "sha256-BDnMEZ5W+mYsX+m04ez7rW6f5c+qIeCw05VwjaH6hDs=",
+        "bytes": 11104,
+        "srcHash": "f01becb0adc2fe6cafb9f06311fd97016a460b2588d54843a772cf0f9e5e56b7"
+      }
     }
   ],
   "simulations": [
     {
       "id": "microscope",
-      "name": "Compound Microscope",
-      "version": "0.1.0",
       "source": "alexandria/engines",
-      "review": "unreviewed",
       "blurb": "Focus a real slide, and count the mistakes",
+      "pitch": "Focus a slide on a compound microscope and count the procedural mistakes made getting there.",
+      "topic": [
+        "science/biology/microscopy"
+      ],
       "about": [
         "A compound microscope with three objectives, coarse and fine focus, a stage and an aperture. The task names a total magnification, a specimen, and the state the instrument was left in. Reaching sharp focus is the goal, and the engine can tell whether you got there.",
         "The goal is not the point. What it teaches is the four procedural mistakes it makes visible and counts on the way: racking down onto the slide, reaching for coarse focus at high power, hunting for focus with the illumination shut, and stepping up in power before the specimen is sharp. Its manifest is unusually explicit about what it does not model, because a simulation that quietly omits a mechanism teaches that the mechanism does not exist."
       ],
+      "manifest": {
+        "name": "Compound Microscope",
+        "version": "0.1.0",
+        "author": "Alexandria samples",
+        "review": "unreviewed",
+        "subject": "biology",
+        "levels": [
+          "lower-secondary",
+          "upper-secondary"
+        ],
+        "scored": true,
+        "taskKinds": [
+          "focus-specimen",
+          "power-series"
+        ]
+      },
       "facts": [
         [
           "SUBJECT",
@@ -153,19 +246,42 @@
           "REVIEW",
           "unreviewed"
         ]
-      ]
+      ],
+      "archive": {
+        "path": "packages/engines/microscope/0.1.0.tar.gz",
+        "hash": "sha256-LE2cK311bJSAtlFBMTSadJFjMF1nwxDVS1neRm9BOpk=",
+        "bytes": 20405,
+        "srcHash": "daaa428f7e1b9193aef01103ab439a9d7b0e0699b4ceabe2c0e95974f355ec2c"
+      }
     },
     {
       "id": "molecule-builder",
-      "name": "Molecule Builder",
-      "version": "0.1.0",
       "source": "alexandria/engines",
-      "review": "unreviewed",
       "blurb": "Build molecules from atoms, valence enforced",
+      "pitch": "Build molecules and check valence, from individual atoms — single covalent bonds only, so no O2, CO2 or N2.",
+      "topic": [
+        "science/chemistry/bonding/covalent"
+      ],
       "about": [
         "Individual atoms of hydrogen, carbon, nitrogen and oxygen, and bonds you make yourself. A build-target task names one molecule to build; a free-build task names a structural constraint instead, so more than one answer is correct. Valence is enforced, so a molecule that could not exist cannot be assembled.",
         "It models single covalent bonds and nothing else, and says so in every task parameter rather than burying it: no O2, no CO2, no N2. An engine that does not declare what it cannot model will eventually be handed a task it gets wrong, and the student has no way to know."
       ],
+      "manifest": {
+        "name": "Molecule Builder",
+        "version": "0.1.0",
+        "author": "Alexandria samples",
+        "review": "unreviewed",
+        "subject": "chemistry",
+        "levels": [
+          "lower-secondary",
+          "upper-secondary"
+        ],
+        "scored": true,
+        "taskKinds": [
+          "build-target",
+          "free-build"
+        ]
+      },
       "facts": [
         [
           "SUBJECT",
@@ -191,7 +307,15 @@
           "REVIEW",
           "unreviewed"
         ]
-      ]
+      ],
+      "archive": {
+        "path": "packages/engines/molecule-builder/0.1.0.tar.gz",
+        "hash": "sha256-RD+/b4rBoNqda2p84bXWqoRgwQT8QPjceA9sSb6SbyE=",
+        "bytes": 5950,
+        "srcHash": "dc39e58ca85b7829db7503c79e63bb8556a6f410e8cd96716d5ab347c9e5b964"
+      }
     }
-  ]
+  ],
+  "_pitch_note": "`pitch` is the matcher-facing one-liner. docs/contracts/registry.md derives it from the manifest's own `pitch`, falling back to `${name}, for ${subject}` — but no engine.json declares one yet, so these are authored here, taken verbatim from that document's worked example. They should move into engine.json so the derivation becomes real rather than duplicated.",
+  "_topic_note": "`topic` is the address the specificity tree walks. It has no manifest origin by design and is authored here."
 }

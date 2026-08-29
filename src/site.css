@@ -204,7 +204,10 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   font-size: var(--size-hero); line-height: var(--line-hero); font-weight: 700;
 }
 .head { display: flex; align-items: flex-start; gap: 24px; }
-.head__actions { margin-left: auto; padding-top: 12px; }
+.head__actions { margin-left: auto; padding-top: 12px; text-align: right; }
+.btn__note { margin: 8px 0 0; font-size: var(--size-meta); line-height: var(--line-meta); color: var(--text-muted); }
+.btn__note a { color: var(--cyan); }
+.btn__note a:hover { text-decoration: underline; }
 
 .btn {
   display: inline-block; padding: 8px 24px;
@@ -221,6 +224,18 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   .head__actions { margin-left: 0; padding-top: 0; }
   .title { font-size: 32px; line-height: 44px; }
 }
+
+/* A world and a simulation are distributed differently, and the note says which. */
+.note {
+  margin-top: 36px;
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 18px 24px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  color: var(--text-dim);
+}
+.note .dot { margin-top: 9px; }
+.note code { font: inherit; color: var(--text); }
 
 /* ── carousel ─────────────────────────────────────────────────────────── */
 

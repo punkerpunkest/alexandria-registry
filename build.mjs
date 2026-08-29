@@ -1,15 +1,17 @@
 // Builds the whole site into dist/. No dependencies, no framework.
-// The registry is meant to be a dumb static host, so the build is one file that
-// reads catalog/packages.json and writes HTML.
+// The registry is meant to be a dumb static host, so the build is one file that reads
+// catalog/packages.json and writes HTML — plus /index.json, which is the half a machine
+// reads. docs/contracts/registry.md in the alexandria repo owns that file's shape.
 import { readFile, writeFile, mkdir, readdir, copyFile, rm, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { join, dirname, extname } from 'node:path';
+import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const OUT = join(ROOT, 'dist');
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const kb = (n) => n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.round(n / 1024)} KB`;
 
 const catalog = JSON.parse(await readFile(join(ROOT, 'catalog', 'packages.json'), 'utf8'));
 
@@ -18,9 +20,8 @@ const KIND = {
   simulations: { slug: 'simulations', one: 'simulation', col: 'SIMULATION', href: '/simulations' },
 };
 
-// ── shots ────────────────────────────────────────────────────────────────────
-// A package's screenshots are whatever PNGs sit in public/shots/<id>, sorted by
-// filename. captions.json beside them is optional and lines up index for index.
+// A package's screenshots are whatever images sit in public/shots/<id>, sorted by filename.
+// captions.json beside them is optional and lines up index for index.
 async function shotsFor(id) {
   const dir = join(ROOT, 'public', 'shots', id);
   if (!existsSync(dir)) return [];
@@ -62,23 +63,25 @@ ${script}
 
 const glass = `<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5 L14.5 14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
 
-const reviewDot = (review) =>
-  review === 'verified'
-    ? '<span class="dot dot--ok" title="verified"></span>'
-    : '<span class="dot dot--open" title="unreviewed"></span>';
+// world.json declares no review field at all, so a world is unreviewed by absence rather
+// than by claim. Both render the same hollow ring; the manifest card says which it is.
+const reviewOf = (p) => p.manifest.review || 'unreviewed';
+const reviewDot = (p) => reviewOf(p) === 'verified'
+  ? '<span class="dot dot--ok" title="verified"></span>'
+  : '<span class="dot dot--open" title="unreviewed"></span>';
 
 // ── list page ────────────────────────────────────────────────────────────────
 function listPage(kind) {
   const k = KIND[kind];
   const items = catalog[kind];
 
-  const rows = items.map((p, i) => `      <a class="row" href="/${k.slug}/${esc(p.id)}" data-hay="${esc((p.id + ' ' + p.name + ' ' + p.blurb + ' ' + p.source).toLowerCase())}">
+  const rows = items.map((p, i) => `      <a class="row" href="/${k.slug}/${esc(p.id)}" data-hay="${esc((p.id + ' ' + p.manifest.name + ' ' + p.blurb + ' ' + p.source).toLowerCase())}">
         <span class="row__rank">${i + 1}</span>
-        <span class="row__name"><b>${esc(p.id)}</b><em>${esc(p.source)}</em>${reviewDot(p.review)}</span>
+        <span class="row__name"><b>${esc(p.id)}</b><em>${esc(p.source)}</em>${reviewDot(p)}</span>
         <span class="row__desc">${esc(p.blurb)}</span>
       </a>`).join('\n');
 
-  const topics = new Set(items.map((p) => (p.facts.find(([a]) => a === 'SUBJECT') || [])[1]).filter(Boolean)).size;
+  const topics = new Set(items.map((p) => p.manifest.subject).filter(Boolean)).size;
   const barText = kind === 'worlds'
     ? `${counts.worlds} worlds in the catalog. Taste is the only way to pick one.`
     : `${counts.simulations} simulations in the catalog, across ${topics} topics.`;
@@ -153,9 +156,10 @@ addEventListener('keydown', (e) => {
 // ── package page ─────────────────────────────────────────────────────────────
 function packagePage(kind, p) {
   const k = KIND[kind];
+  const m = p.manifest;
 
   const stage = p.shots.length
-    ? p.shots.map((s, i) => `      <img src="${esc(s.src)}" alt="${esc(p.name)} screenshot ${i + 1}" class="${i === 0 ? 'is-on' : ''}" ${i ? 'loading="lazy"' : ''}>`).join('\n')
+    ? p.shots.map((s, i) => `      <img src="${esc(s.src)}" alt="${esc(m.name)} screenshot ${i + 1}" class="${i === 0 ? 'is-on' : ''}" ${i ? 'loading="lazy"' : ''}>`).join('\n')
     : `      <p class="shots__none">No screenshots yet. A package earns its claims by rendering, not by describing itself.</p>`;
 
   const arrows = p.shots.length > 1 ? `
@@ -167,8 +171,25 @@ function packagePage(kind, p) {
     : '';
 
   const caption = p.shots.length
-    ? `<p class="caption" id="caption">${esc(pad(1) + (p.shots[0].caption ? ' — ' + p.shots[0].caption : ''))}</p>`
+    ? `<p class="caption" id="caption">${esc('01' + (p.shots[0].caption ? ' — ' + p.shots[0].caption : ''))}</p>`
     : '';
+
+  // The two halves are distributed differently and the page must not pretend otherwise:
+  // Alexandria installs an engine for you and cannot install a world at all.
+  const note = kind === 'simulations'
+    ? `<div class="note">
+    <span class="dot dot--accent"></span>
+    <span>You never install this by hand. Alexandria matches a simulation to what you are learning, fetches this archive itself, and checks its hash before a byte is written.</span>
+  </div>`
+    : `<div class="note">
+    <span class="dot dot--open"></span>
+    <span>Alexandria cannot install worlds yet. Download the archive and unpack it into <code>worlds/${esc(p.id)}/</code> inside your Alexandria install.</span>
+  </div>`;
+
+  const action = p.archive
+    ? `<a class="btn" href="/${esc(p.archive.path)}" download>Download archive</a>
+      <p class="btn__note">${esc(kb(p.archive.bytes))} &middot; <a href="/index.json">hash in the index</a></p>`
+    : `<p class="btn__note">Not packaged yet.</p>`;
 
   const body = `<main class="page page--package col">
   <a class="back" href="${k.href}">&larr; Registry</a>
@@ -176,10 +197,12 @@ function packagePage(kind, p) {
   <div class="head">
     <div>
       <h1 class="title">${esc(p.id)}</h1>
-      <p class="meta">${esc(p.source)} <span>&middot;</span> ${esc(p.version)} <span>&middot;</span> ${reviewDot(p.review)} ${esc(p.review)}</p>
+      <p class="meta">${esc(p.source)} <span>&middot;</span> ${esc(m.version)} <span>&middot;</span> ${reviewDot(p)} ${esc(reviewOf(p))}</p>
     </div>
-    <div class="head__actions"><a class="btn" href="#install">Install</a></div>
+    <div class="head__actions">${action}</div>
   </div>
+
+  ${note}
 
   <div class="shots">
 ${stage}${arrows}
@@ -227,12 +250,48 @@ addEventListener('keydown', (e) => {
 
   return shell({
     title: `${p.id} — Alexandria registry`,
-    description: p.blurb,
+    description: p.pitch || p.blurb,
     body, script,
   });
 }
 
-function pad(n) { return String(n).padStart(2, '0'); }
+// ── /index.json — the half a machine reads ───────────────────────────────────
+// Shape owned by docs/contracts/registry.md. `archive` is relative to this file's own URL
+// so the host can move or be mirrored without rewriting every entry.
+function machineIndex() {
+  const engines = catalog.simulations.filter((p) => p.archive).map((p) => ({
+    id: p.id,
+    version: p.manifest.version,
+    name: p.manifest.name,
+    author: p.manifest.author,
+    review: p.manifest.review,
+    subject: p.manifest.subject,
+    levels: p.manifest.levels,
+    scored: p.manifest.scored,
+    pitch: p.pitch || `${p.manifest.name}, for ${p.manifest.subject}`,
+    taskKinds: p.manifest.taskKinds,
+    topic: p.topic || [],
+    archive: p.archive.path,
+    hash: p.archive.hash,
+    bytes: p.archive.bytes,
+  }));
+
+  // Specified by the contract so the site has one format, and marked there as not yet
+  // consumable. No `author`: world.json declares none, and the site will not invent an
+  // identity a package does not claim.
+  const worlds = catalog.worlds.filter((p) => p.archive).map((p) => ({
+    id: p.id,
+    version: p.manifest.version,
+    name: p.manifest.name,
+    archetype: p.manifest.archetype,
+    ...(p.manifest.viewport ? { viewport: p.manifest.viewport } : {}),
+    archive: p.archive.path,
+    hash: p.archive.hash,
+    bytes: p.archive.bytes,
+  }));
+
+  return { index: 1, generated: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'), engines, worlds };
+}
 
 // ── copy public/ verbatim ────────────────────────────────────────────────────
 async function copyTree(from, to) {
@@ -264,8 +323,12 @@ for (const kind of Object.keys(KIND)) {
   }
 }
 
+const index = machineIndex();
+await writeFile(join(OUT, 'index.json'), JSON.stringify(index, null, 2) + '\n');
+
 await copyFile(join(ROOT, 'src', 'site.css'), join(OUT, 'site.css'));
 const assets = await copyTree(join(ROOT, 'public'), OUT);
 
 const shotCount = Object.keys(KIND).reduce((n, k) => n + catalog[k].reduce((m, p) => m + p.shots.length, 0), 0);
-console.log(`built ${pages} pages, ${assets} assets, ${shotCount} screenshots -> dist/`);
+console.log(`built ${pages} pages, ${assets} assets, ${shotCount} screenshots, ` +
+            `index.json with ${index.engines.length} engines and ${index.worlds.length} worlds -> dist/`);
