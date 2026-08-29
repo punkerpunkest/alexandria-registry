@@ -206,6 +206,7 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .head { display: flex; align-items: flex-start; gap: 24px; }
 .head__actions { margin-left: auto; padding-top: 12px; text-align: right; }
 .btn__note { margin: 8px 0 0; font-size: var(--size-meta); line-height: var(--line-meta); color: var(--text-muted); }
+.btn__note code { font: inherit; color: var(--text-dim); }
 .btn__note a { color: var(--cyan); }
 .btn__note a:hover { text-decoration: underline; }
 

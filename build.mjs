@@ -4,7 +4,8 @@
 // reads. docs/contracts/registry.md in the alexandria repo owns that file's shape.
 import { readFile, writeFile, mkdir, readdir, copyFile, rm, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, extname, basename } from 'node:path';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
@@ -22,6 +23,10 @@ const KIND = {
 
 // A package's screenshots are whatever images sit in public/shots/<id>, sorted by filename.
 // captions.json beside them is optional and lines up index for index.
+// The published filename carries a digest of the file's own bytes. Without it a screenshot
+// that changes keeps its URL, and anyone who has already loaded the page holds the old
+// image until the cache header expires — which is exactly what happened on 29 Aug. Content
+// addressing is what makes a long immutable cache safe rather than a trap.
 async function shotsFor(id) {
   const dir = join(ROOT, 'public', 'shots', id);
   if (!existsSync(dir)) return [];
@@ -30,7 +35,15 @@ async function shotsFor(id) {
   if (existsSync(join(dir, 'captions.json'))) {
     try { captions = JSON.parse(await readFile(join(dir, 'captions.json'), 'utf8')); } catch {}
   }
-  return files.map((f, i) => ({ src: `/shots/${id}/${f}`, caption: captions[i] || '' }));
+  const out = [];
+  for (const [i, f] of files.entries()) {
+    const bytes = await readFile(join(dir, f));
+    const digest = createHash('sha256').update(bytes).digest('hex').slice(0, 8);
+    const ext = extname(f);
+    const name = `${basename(f, ext)}.${digest}${ext}`;
+    out.push({ from: join(dir, f), src: `/shots/${id}/${name}`, to: join(OUT, 'shots', id, name), caption: captions[i] || '' });
+  }
+  return out;
 }
 
 for (const kind of Object.keys(KIND)) {
@@ -181,14 +194,14 @@ function packagePage(kind, p) {
     <span class="dot dot--accent"></span>
     <span>You never install this by hand. Alexandria matches a simulation to what you are learning, fetches this archive itself, and checks its hash before a byte is written.</span>
   </div>`
-    : `<div class="note">
-    <span class="dot dot--open"></span>
-    <span>Alexandria cannot install worlds yet. Download the archive and unpack it into <code>worlds/${esc(p.id)}/</code> inside your Alexandria install.</span>
-  </div>`;
+    : '';
 
+  const sub = kind === 'simulations'
+    ? `${esc(kb(p.archive?.bytes ?? 0))} &middot; <a href="/index.json">hash in the index</a>`
+    : `${esc(kb(p.archive?.bytes ?? 0))} &middot; unpacks into <code>worlds/${esc(p.id)}/</code>`;
   const action = p.archive
     ? `<a class="btn" href="/${esc(p.archive.path)}" download>Download archive</a>
-      <p class="btn__note">${esc(kb(p.archive.bytes))} &middot; <a href="/index.json">hash in the index</a></p>`
+      <p class="btn__note">${sub}</p>`
     : `<p class="btn__note">Not packaged yet.</p>`;
 
   const body = `<main class="page page--package col">
@@ -203,7 +216,6 @@ function packagePage(kind, p) {
   </div>
 
   ${note}
-
   <div class="shots">
 ${stage}${arrows}
   </div>
@@ -300,6 +312,7 @@ async function copyTree(from, to) {
   let n = 0;
   for (const entry of await readdir(from, { withFileTypes: true })) {
     if (entry.name.startsWith('.')) continue;
+    if (from === join(ROOT, 'public') && entry.name === 'shots') continue;  // written hashed, below
     const src = join(from, entry.name), dst = join(to, entry.name);
     if (entry.isDirectory()) n += await copyTree(src, dst);
     else if (entry.name !== 'captions.json') { await copyFile(src, dst); n++; }
@@ -327,7 +340,16 @@ const index = machineIndex();
 await writeFile(join(OUT, 'index.json'), JSON.stringify(index, null, 2) + '\n');
 
 await copyFile(join(ROOT, 'src', 'site.css'), join(OUT, 'site.css'));
-const assets = await copyTree(join(ROOT, 'public'), OUT);
+let assets = await copyTree(join(ROOT, 'public'), OUT);
+for (const kind of Object.keys(KIND)) {
+  for (const p of catalog[kind]) {
+    for (const shot of p.shots) {
+      await mkdir(dirname(shot.to), { recursive: true });
+      await copyFile(shot.from, shot.to);
+      assets++;
+    }
+  }
+}
 
 const shotCount = Object.keys(KIND).reduce((n, k) => n + catalog[k].reduce((m, p) => m + p.shots.length, 0), 0);
 console.log(`built ${pages} pages, ${assets} assets, ${shotCount} screenshots, ` +
